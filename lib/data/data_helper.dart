@@ -1,65 +1,117 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:finalproject/models/diet_model.dart';
-
 class DatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
-  factory DatabaseHelper() => _instance;
-
-  DatabaseHelper._internal();
+  static final DatabaseHelper instance = DatabaseHelper._init();
 
   static Database? _database;
 
+  DatabaseHelper._init();
+
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDatabase();
+
+    _database = await _initDB('diet.db');
     return _database!;
   }
 
-  Future<Database> _initDatabase() async {
+  Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'diets.db');
+    final path = join(dbPath, filePath);
 
     return await openDatabase(
       path,
       version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE Diets (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            ingredients TEXT NOT NULL,
-            iconPath TEXT NOT NULL,
-            level TEXT NOT NULL,
-            duration TEXT NOT NULL,
-            calorie TEXT NOT NULL,
-            boxColor TEXT NOT NULL,
-            viewIsSelected INTEGER NOT NULL
-          )
-        ''');
-      },
+      onCreate: _createDB,
     );
   }
 
-  Future<int> insertDiet(DietModel diet) async {
-    final db = await database;
-    return await db.insert('Diets', diet.toMap());
+  Future _createDB(Database db, int version) async {
+    const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+    const textType = 'TEXT NOT NULL';
+    const boolType = 'BOOLEAN NOT NULL';
+    const intType = 'INTEGER NOT NULL';
+
+    await db.execute('''
+CREATE TABLE diets (
+  id $idType,
+  name $textType,
+  ingredients $textType,
+  iconPath $textType,
+  level $textType,
+  duration $textType,
+  calorie $textType,
+  boxColor $intType,
+  viewIsSelected $boolType
+  )
+''');
   }
 
-  Future<List<DietModel>> getAllDiets() async {
-    final db = await database;
-    final List<Map<String, dynamic>> result = await db.query('Diets');
-    return result.map((map) => DietModel.fromMap(map)).toList();
+  Future<int> create(DietModel diet) async {
+    final db = await instance.database;
+
+    return await db.insert('diets', diet.toMap());
   }
 
-  Future<int> updateDiet(DietModel diet) async {
-    final db = await database;
-    return await db.update('Diets', diet.toMap(),
-        where: 'name = ?', whereArgs: [diet.name]);
+  Future<DietModel?> readDiet(int id) async {
+    final db = await instance.database;
+
+    final maps = await db.query(
+      'diets',
+      columns: [
+        'id',
+        'name',
+        'ingredients',
+        'iconPath',
+        'level',
+        'duration',
+        'calorie',
+        'boxColor',
+        'viewIsSelected'
+      ],
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return DietModel.fromMap(maps.first);
+    } else {
+      return null;
+    }
   }
 
-  Future<int> deleteDiet(String name) async {
-    final db = await database;
-    return await db.delete('Diets', where: 'name = ?', whereArgs: [name]);
+  Future<List<DietModel>> readAllDiets() async {
+    final db = await instance.database;
+
+    final result = await db.query('diets');
+
+    return result.map((json) => DietModel.fromMap(json)).toList();
+  }
+
+  Future<int> update(DietModel diet ,int id) async {
+    final db = await instance.database;
+
+    return db.update(
+      'diets',
+      diet.toMap(),
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> delete(int id) async {
+    final db = await instance.database;
+
+    return await db.delete(
+      'diets',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future close() async {
+    final db = await instance.database;
+
+    db.close();
   }
 }

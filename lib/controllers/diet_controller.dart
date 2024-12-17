@@ -8,11 +8,11 @@ class DietController extends GetxController {
   var searchQuery = ''.obs;
   var selectedIngredients = List<String>.empty(growable: true).obs;
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
-    // Initialize with some items
-
+    
     List<DietModel> items = [
+
       DietModel(
           name: 'Canai Bread',
           ingredients: ['Pasta', 'Tomato', 'Cheese'],
@@ -23,7 +23,7 @@ class DietController extends GetxController {
           viewIsSelected: false,
           boxColor: const Color(0xffEEA4CE)),
       DietModel(
-          name: 'Honey Pancake',
+          name: 'Mola Pancake',
           ingredients: ['Pizza base', 'Tomato', 'Cheese'],
           iconPath: 'assets/icons/honey-pancakes.svg',
           level: 'Easy',
@@ -32,7 +32,7 @@ class DietController extends GetxController {
           viewIsSelected: false,
           boxColor: const Color(0xff9DCEFF)),
       DietModel(
-          name: 'Honey Pancake',
+          name: 'Bola Pancake',
           ingredients: ['Burger bun', 'Tomato', 'Cheese'],
           iconPath: 'assets/icons/honey-pancakes.svg',
           level: 'Easy',
@@ -50,12 +50,23 @@ class DietController extends GetxController {
           viewIsSelected: false,
           boxColor: const Color(0xffEEA4CE)),
     ];
-    itemList.addAll([items[0], items[1], items[2], items[3]]);
+
+    // itemList.addAll([items[0], items[1], items[2], items[3]]);
+    
     addDiet(items[0]);
     addDiet(items[1]);
     addDiet(items[2]);
     addDiet(items[3]);
 
+    var allDiet = await getAllDiet();
+
+    itemList.addAll(allDiet);
+
+  }
+
+  Future<List<DietModel>> getAllDiet () async {
+    final  allDiet = await dbHelper.readAllDiets(); 
+    return allDiet;
   }
 
   void updateSearchQuery(String query) {
@@ -67,40 +78,31 @@ class DietController extends GetxController {
   }
 
   List<DietModel> get filteredRecipe {
-
-    if ( searchQuery.isEmpty) {
-      return List.empty();
+    
+    if (searchQuery.value.isEmpty) {
+      return List<DietModel>.empty();
     }
     var filteredItems = itemList.toList();
 
     if (selectedIngredients.isNotEmpty) {
-
-      filteredItems = filteredItems
-          .where((item) {
-            return item.ingredients.any((ingredient) {
-              return selectedIngredients.contains(ingredient);
-            });
-          })
-          .toList();
-         
+      filteredItems = filteredItems.where((item) {
+        return item.ingredients.any((ingredient) {
+          return selectedIngredients.contains(ingredient);
+        });
+      }).toList();
     }
     if (searchQuery.isNotEmpty) {
-      filteredItems = filteredItems
-          .where((item) {
-            return item.name.contains(searchQuery.value);
-          })
-          .toList(); 
+      filteredItems = filteredItems.where((item) {
+        return item.name.toLowerCase().contains(searchQuery.value);
+      }).toList();
     }
     return filteredItems;
   }
 
-final dbHelper = DatabaseHelper();
+  final dbHelper = DatabaseHelper.instance;
 
-void addDiet(DietModel diet) async {
-  await dbHelper.insertDiet(diet);
-  print('Diet added to the database!');
-}
-
-
-
+  void addDiet(DietModel diet) async {
+    await dbHelper.create(diet);
+    print('Diet added to the database!');
+  }
 }

@@ -40,7 +40,6 @@ dependencies:
   filter_list: any
   sqflite: any
   path: any
-  sqflite_common_ffi: any
 
 
 dev_dependencies:

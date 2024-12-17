@@ -17,11 +17,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var isFocused = false.obs;
+
   List<CategoryModel> categories = [];
   var diets = [];
   List<PopularDietsModel> popularDiets = [];
   FocusNode searchFocusNode = FocusNode();
-  String searchQuery = '';
+  
   final DietController searchBarcontroller = Get.put(DietController());
   TextEditingController searchControllerToRemove = TextEditingController();
 
@@ -29,7 +31,13 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _getInitialInfo();
+    searchFocusNode.addListener(() {
+      setState(() {
+        isFocused.value = searchFocusNode.hasFocus;
+      });
+    });
   }
+
 
   void _getInitialInfo() {
     categories = CategoryModel.getCategories();
@@ -350,12 +358,9 @@ class _HomePageState extends State<HomePage> {
               },
               onChanged: (value) {
 
-                if (value.isNotEmpty) {
                   searchBarcontroller.updateSearchQuery(value.toLowerCase());
-                }
-
+     
                 setState(() {
-                  searchQuery = value;
                   searchFocusNode.hasFocus;
                 });
               },
@@ -376,7 +381,9 @@ class _HomePageState extends State<HomePage> {
                       : GestureDetector(
                           onTap: () {
                             searchControllerToRemove.clear();
+                            searchBarcontroller.updateSearchQuery('');
                             setState(() {
+                              
                               searchFocusNode.unfocus();
                             });
                           },
@@ -418,7 +425,7 @@ class _HomePageState extends State<HomePage> {
               height: 10,
             ),
             Obx(() {
-              return searchFocusNode.hasFocus &&
+              return isFocused.value &&
                       searchBarcontroller.filteredRecipe.isNotEmpty
                   ? Container(
                       decoration: BoxDecoration(
@@ -435,8 +442,7 @@ class _HomePageState extends State<HomePage> {
                       child: ListView.builder(
                           itemCount: searchBarcontroller.filteredRecipe.length,
                           itemBuilder: (context, index) {
-                            final diet =
-                                searchBarcontroller.filteredRecipe[index];
+                            final diet = searchBarcontroller.filteredRecipe[index];
                             return Container(
                               height: 100,
                               decoration: BoxDecoration(
@@ -497,7 +503,7 @@ class _HomePageState extends State<HomePage> {
                             );
                           }),
                     )
-                  : searchFocusNode.hasFocus && searchQuery.isNotEmpty
+                  : isFocused.value && searchBarcontroller.searchQuery.value.isNotEmpty
                       ? Container(
                           decoration: BoxDecoration(
                               boxShadow: [
