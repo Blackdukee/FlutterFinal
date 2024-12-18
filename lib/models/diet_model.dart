@@ -51,9 +51,8 @@ class DietModel {
         calorie: '230kCal',
         viewIsSelected: false,
         boxColor: const Color(0xffEEA4CE)));
-
-
     return diets;
+    
   }
 
   static DietModel fromMap(Map<String, dynamic> map) {

@@ -4,15 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:finalproject/data/data_helper.dart';
 
 class DietController extends GetxController {
+
   var itemList = List<DietModel>.empty(growable: true).obs;
   var searchQuery = ''.obs;
   var selectedIngredients = List<String>.empty(growable: true).obs;
+  var currentPage = ''.obs;
+
   @override
   void onInit() async {
     super.onInit();
-    
-    List<DietModel> items = [
 
+    List<DietModel> items = [
       DietModel(
           name: 'Canai Bread',
           ingredients: ['Pasta', 'Tomato', 'Cheese'],
@@ -52,7 +54,7 @@ class DietController extends GetxController {
     ];
 
     // itemList.addAll([items[0], items[1], items[2], items[3]]);
-    
+
     addDiet(items[0]);
     addDiet(items[1]);
     addDiet(items[2]);
@@ -61,11 +63,10 @@ class DietController extends GetxController {
     var allDiet = await getAllDiet();
 
     itemList.addAll(allDiet);
-
   }
 
-  Future<List<DietModel>> getAllDiet () async {
-    final  allDiet = await dbHelper.readAllDiets(); 
+  Future<List<DietModel>> getAllDiet() async {
+    final allDiet = await dbHelper.readAllDiets();
     return allDiet;
   }
 
@@ -76,12 +77,22 @@ class DietController extends GetxController {
   void updateSelectedIngredients(List<String> selectedIngredients) {
     this.selectedIngredients.value = selectedIngredients;
   }
+  
+
+  void updateCurrentPage(String page) {
+    currentPage.value = page;
+  }
 
   List<DietModel> get filteredRecipe {
-    
+    // if the current context is catogry page then return all the items
+
     if (searchQuery.value.isEmpty) {
+      if (currentPage.value == 'Category') {
+        return itemList.toList();
+      }
       return List<DietModel>.empty();
     }
+    
     var filteredItems = itemList.toList();
 
     if (selectedIngredients.isNotEmpty) {
@@ -91,6 +102,8 @@ class DietController extends GetxController {
         });
       }).toList();
     }
+
+
     if (searchQuery.isNotEmpty) {
       filteredItems = filteredItems.where((item) {
         return item.name.toLowerCase().contains(searchQuery.value);
