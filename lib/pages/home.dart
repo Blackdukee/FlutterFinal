@@ -8,7 +8,19 @@ import 'package:filter_list/filter_list.dart';
 import 'package:final_project/controllers/diet_controller.dart';
 import 'package:get/get.dart';
 
-List<String> DefaultList = ['Pasta', 'Tomato', 'Cheese', 'Pizza base'];
+List<String> DefaultList = [
+  'Pasta',
+  'Tomato',
+  'Cheese',
+  'Pizza base',
+  'Salmon',
+  'Rice',
+  'Nori',
+  'Bola',
+  'Milk',
+  'Eggs',
+  'Flour'
+];
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -48,6 +60,7 @@ class _HomePageState extends State<HomePage> {
     await FilterListDialog.display<String>(
       context,
       listData: DefaultList,
+      selectedItemsText: "Ingredients",
       selectedListData: dietController.selectedIngredients.toList(),
       choiceChipLabel: (item) => item,
       validateSelectedItem: (list, val) => list!.contains(val),
@@ -453,132 +466,135 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(
               height: 10,
             ),
-            FutureBuilder<List<DietModel>>(
-              future: dietController.filteredRecipe,
-              builder: (context, snapshot) {
-                if (!isFocused.value) {
-                  return Container();
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Container(
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                }
-                if (snapshot.hasError) {
-                  return Container();
-                }
-                final data = snapshot.data ?? [];
-                if (data.isNotEmpty) {
-                  return Container(
-                    decoration: BoxDecoration(
+            Obx(() {
+              return FutureBuilder<List<DietModel>>(
+                future: dietController.filteredRecipe,
+                builder: (context, snapshot) {
+                  if (!isFocused.value) {
+                    return Container();
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Container();
+                  }
+                  final data = snapshot.data ?? [];
+                  if (data.isNotEmpty) {
+                    return Container(
+                      decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color:
+                                    const Color(0xff1D1617).withOpacity(0.11),
+                                blurRadius: 40,
+                                spreadRadius: 0.0)
+                          ],
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15)),
+                      height: 300,
+                      child: ListView.builder(
+                        itemCount: data.length,
+                        itemBuilder: (context, index) {
+                          final diet = data[index];
+                          return Container(
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      const Color(0xff1D1617).withOpacity(0.07),
+                                  offset: const Offset(0, 10),
+                                  blurRadius: 40,
+                                  spreadRadius: 0,
+                                )
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                SvgPicture.asset(
+                                  diet.iconPath,
+                                  width: 65,
+                                  height: 65,
+                                ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      diet.name,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    Text(
+                                      diet.level +
+                                          ' | ' +
+                                          diet.duration +
+                                          ' | ' +
+                                          diet.calorie,
+                                      style: const TextStyle(
+                                        color: Color(0xff7B6F72),
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                GestureDetector(
+                                  onTap: () {},
+                                  child: SvgPicture.asset(
+                                    'assets/icons/button.svg',
+                                    width: 30,
+                                    height: 30,
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  } else if (dietController.searchQuery.value.isNotEmpty) {
+                    return Container(
+                      decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                              color: const Color(0xff1D1617).withOpacity(0.11),
-                              blurRadius: 40,
-                              spreadRadius: 0.0)
+                            color: const Color(0xff1D1617).withOpacity(0.11),
+                            blurRadius: 40,
+                            spreadRadius: 0.0,
+                          )
                         ],
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(15)),
-                    height: 300,
-                    child: ListView.builder(
-                      itemCount: data.length,
-                      itemBuilder: (context, index) {
-                        final diet = data[index];
-                        return Container(
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color:
-                                    const Color(0xff1D1617).withOpacity(0.07),
-                                offset: const Offset(0, 10),
-                                blurRadius: 40,
-                                spreadRadius: 0,
-                              )
-                            ],
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      height: 100,
+                      child: const Center(
+                        child: Text(
+                          'No recipes found',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              SvgPicture.asset(
-                                diet.iconPath,
-                                width: 65,
-                                height: 65,
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    diet.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  Text(
-                                    diet.level +
-                                        ' | ' +
-                                        diet.duration +
-                                        ' | ' +
-                                        diet.calorie,
-                                    style: const TextStyle(
-                                      color: Color(0xff7B6F72),
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              GestureDetector(
-                                onTap: () {},
-                                child: SvgPicture.asset(
-                                  'assets/icons/button.svg',
-                                  width: 30,
-                                  height: 30,
-                                ),
-                              )
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                } else if (dietController.searchQuery.value.isNotEmpty) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xff1D1617).withOpacity(0.11),
-                          blurRadius: 40,
-                          spreadRadius: 0.0,
-                        )
-                      ],
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    height: 100,
-                    child: const Center(
-                      child: Text(
-                        'No recipes found',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                  );
-                } else {
-                  return Container();
-                }
-              },
-            ),
+                    );
+                  } else {
+                    return Container();
+                  }
+                },
+              );
+            })
           ],
         ));
   }

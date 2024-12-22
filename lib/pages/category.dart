@@ -41,7 +41,8 @@ class _CategoryPageState extends State<CategoryPage> {
         isFocused.value = searchFocusNode.hasFocus;
       });
     });
-    dietController.currentPage.value = '${widget.category} Category';
+    dietController.updateCurrentPage('${widget.category} Category');
+    // dietController.currentPage.value = '${widget.category} Category';
   }
 
   void _getInitialInfo() async {

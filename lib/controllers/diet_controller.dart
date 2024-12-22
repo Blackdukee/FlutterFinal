@@ -1,6 +1,7 @@
 import 'package:final_project/models/diet_model.dart';
 import 'package:final_project/services/api_service.dart';
 import 'package:get/get.dart';
+import 'package:flutter/widgets.dart';
 
 class DietController extends GetxController {
   var itemList = List<DietModel>.empty(growable: true).obs;
@@ -11,8 +12,10 @@ class DietController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    itemList.value =
-        await apiService.getDietsByCategory(currentPage.value.split(' ')[0]);
+    if (currentPage.value.isNotEmpty) {
+      itemList.value =
+          await apiService.getDietsByCategory(currentPage.value.split(' ')[0]);
+    }
   }
 
   void updateSearchQuery(String query) {
@@ -24,7 +27,9 @@ class DietController extends GetxController {
   }
 
   void updateCurrentPage(String page) {
-    currentPage.value = page;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      currentPage.value = page;
+    });
   }
 
   Future<List<DietModel>> get filteredRecipe async {
@@ -39,7 +44,7 @@ class DietController extends GetxController {
       }
     }
 
-    if (selectedIngredients.isNotEmpty) {
+    if (selectedIngredients.isNotEmpty && searchQuery.isNotEmpty) {
       if (currentPage.value.split(' ').length > 1 &&
           currentPage.value.split(' ')[1] == 'Category') {
         filteredItems = filteredItems.where((item) {
@@ -51,8 +56,8 @@ class DietController extends GetxController {
         return filteredItems;
       }
 
-      filteredItems =
-          await apiService.getDietsWithFilters(selectedIngredients.join(','));
+      filteredItems = await apiService.getDietsWIthFilterAndQuery(
+          selectedIngredients.join(','), searchQuery.value);
 
       if (searchQuery.isNotEmpty) {
         filteredItems = filteredItems.where((item) {
