@@ -1,6 +1,7 @@
 import 'package:final_project/models/diet_model.dart';
 import 'package:final_project/services/api_service.dart';
 import 'package:get/get.dart';
+import 'dart:io';
 import 'package:flutter/widgets.dart';
 
 class DietController extends GetxController {
@@ -12,10 +13,27 @@ class DietController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    if (currentPage.value.isNotEmpty) {
-      itemList.value =
-          await apiService.getDietsByCategory(currentPage.value.split(' ')[0]);
+    try {
+      if (currentPage.value.isNotEmpty) {
+        itemList.value = await apiService
+                .getDietsByCategory(currentPage.value.split(' ')[0]) ??
+            [];
+      }
+    } catch (e) {
+      if (e.toString() == 'Exception: No internet connection') {
+        Get.snackbar(
+            'No internet connection', 'Please check your internet connection');
+      } else {
+        Get.snackbar('Error', 'Failed to retrieve diets by category');
+      }
     }
+  }
+
+  Future<List<DietModel>> get getDietsByCategory async {
+    var recipes =
+        await apiService.getDietsByCategory(currentPage.value.split(' ')[0]) ??
+            [];
+    return recipes;
   }
 
   void updateSearchQuery(String query) {
@@ -34,44 +52,55 @@ class DietController extends GetxController {
 
   Future<List<DietModel>> get filteredRecipe async {
     var filteredItems = itemList.toList();
-
-    if (searchQuery.value.isEmpty) {
-      if (currentPage.value.split('').length > 1 &&
-          currentPage.value.split(' ')[1] == 'Category') {
-        filteredItems =
-            await getDietByCategory(currentPage.value.split(' ')[0]);
-        return filteredItems;
-      }
-    }
-
-    if (selectedIngredients.isNotEmpty && searchQuery.isNotEmpty) {
-      if (currentPage.value.split(' ').length > 1 &&
-          currentPage.value.split(' ')[1] == 'Category') {
-        filteredItems = filteredItems.where((item) {
-          return selectedIngredients.any((ingredient) {
-            return item.ingredients.contains(ingredient);
-          });
-        }).toList();
-
-        return filteredItems;
+    try {
+      if (searchQuery.value.isEmpty) {
+        if (currentPage.value.split('').length > 1 &&
+            currentPage.value.split(' ')[1] == 'Category') {
+          filteredItems = await apiService
+                  .getDietsByCategory(currentPage.value.split(' ')[0]) ??
+              [];
+          return filteredItems;
+        }
       }
 
-      filteredItems = await apiService.getDietsWIthFilterAndQuery(
-          selectedIngredients.join(','), searchQuery.value);
+      if (selectedIngredients.isNotEmpty && searchQuery.isNotEmpty) {
+        if (currentPage.value.split(' ').length > 1 &&
+            currentPage.value.split(' ')[1] == 'Category') {
+          filteredItems = filteredItems.where((item) {
+            return selectedIngredients.any((ingredient) {
+              return item.ingredients.contains(ingredient);
+            });
+          }).toList();
+
+          return filteredItems;
+        }
+
+        filteredItems = await apiService.getDietsWIthFilterAndQuery(
+            selectedIngredients.join(','), searchQuery.value);
+
+        if (searchQuery.isNotEmpty) {
+          filteredItems = filteredItems.where((item) {
+            return item.name.toLowerCase().contains(searchQuery.value);
+          }).toList();
+
+          return filteredItems;
+        }
+      }
 
       if (searchQuery.isNotEmpty) {
-        filteredItems = filteredItems.where((item) {
-          return item.name.toLowerCase().contains(searchQuery.value);
-        }).toList();
-
+        filteredItems = await apiService.getDietsWithQuery(searchQuery.value);
+        return filteredItems;
+      } else {
         return filteredItems;
       }
-    }
-
-    if (searchQuery.isNotEmpty) {
-      filteredItems = await apiService.getDietsWithQuery(searchQuery.value);
-      return filteredItems;
-    } else {
+    } catch (e) {
+      if (e.toString() == 'Exception: No internet connection') {
+        Get.snackbar(
+            'No internet connection', 'Please check your internet connection');
+      } else {
+        Get.snackbar('Error', 'Failed to retrieve diets by category');
+      }
+    } finally {
       return filteredItems;
     }
   }
@@ -80,12 +109,5 @@ class DietController extends GetxController {
 
   void createDiet(DietModel diet) async {
     await apiService.createDiet(diet);
-  }
-
-  Future<List<DietModel>> getDietByCategory(String category) async {
-    List<DietModel> items = [];
-    items = await apiService.getDietsByCategory(category);
-    print(items.length);
-    return items;
   }
 }

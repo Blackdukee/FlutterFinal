@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:final_project/models/diet_model.dart';
 import 'package:final_project/models/user_model.dart';
@@ -10,11 +11,13 @@ class ApiService {
   Future<DietModel> createDiet(DietModel diet) async {
     // todo : user login
     Get.log(diet.toJson());
-    final response = await http.post(
-      Uri.parse('$baseUrl/diets'),
-      headers: {'Content-Type': 'application/json'},
-      body: diet.toJson(),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/diets'),
+          headers: {'Content-Type': 'application/json'},
+          body: diet.toJson(),
+        )
+        .timeout(Duration(seconds: 10));
 
     if (response.statusCode == 201) {
       return DietModel.fromMap(jsonDecode(response.body));
@@ -34,14 +37,22 @@ class ApiService {
     }
   }
 
-  Future<List<DietModel>> getDietsByCategory(String category) async {
-    final response =
-        await http.get(Uri.parse('$baseUrl/diets/category/$category'));
-    if (response.statusCode == 200) {
-      Iterable list = jsonDecode(response.body);
-      return list.map((json) => DietModel.fromMap(json)).toList();
-    } else {
-      throw Exception('Failed to retrieve diets');
+  Future<List<DietModel>?> getDietsByCategory(String category) async {
+    try {
+      final response =
+          await http.get(Uri.parse('$baseUrl/diets/category/$category'));
+      if (response.statusCode == 200) {
+        Iterable list = jsonDecode(response.body);
+        return list.map((json) => DietModel.fromMap(json)).toList();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      if (e is SocketException) {
+        throw Exception('No internet connection');
+      } else {
+        throw Exception('Failed to retrieve diets by category');
+      }
     }
   }
 
