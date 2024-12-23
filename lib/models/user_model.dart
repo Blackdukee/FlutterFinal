@@ -1,7 +1,7 @@
 import 'package:final_project/models/diet_model.dart';
 
 class UserModel {
-  final String id;
+  String? id;
   final String name;
   final String email;
   final String password;
@@ -9,7 +9,6 @@ class UserModel {
   final List<DietModel> savedRecipes;
 
   UserModel({
-    required this.id,
     required this.name,
     required this.email,
     required this.password,
@@ -17,18 +16,21 @@ class UserModel {
     required this.savedRecipes,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-        id: json['id'],
-        name: json['name'],
-        email: json['email'],
-        password: json['password'],
-        history: (json['history'] as List)
-            .map((item) => DietModel.fromMap(item))
-            .toList(),
-        savedRecipes: (json['savedRecipes'] as List)
-            .map((item) => DietModel.fromMap(item))
-            .toList(),
-      );
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    var user = UserModel(
+      name: json['name'],
+      email: json['email'],
+      password: json['password'],
+      history: (json['history'] as List)
+          .map((item) => DietModel.fromMap(item))
+          .toList(),
+      savedRecipes: (json['savedRecipes'] as List)
+          .map((item) => DietModel.fromMap(item))
+          .toList(),
+    );
+    user.id = json['id'];
+    return user; 
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,

@@ -14,6 +14,32 @@ class RecipeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(diet.name),
       ),
+      drawer: Drawer(
+        shadowColor: const Color.fromARGB(0, 194, 146, 146),
+        backgroundColor: const Color(0xffF7F8F8),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              decoration: BoxDecoration(
+                color: Color(0xffF7F8F8),
+              ),
+              accountName: Text(
+                user.name,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              accountEmail: null,
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: AssetImage('assets/images/user_photo.png'),
+              ),
+            ),
+          ],
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0), // Added const
         child: Column(

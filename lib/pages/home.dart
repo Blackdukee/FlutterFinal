@@ -1,36 +1,43 @@
 import 'package:final_project/models/category_model.dart';
 import 'package:final_project/models/diet_model.dart';
+import 'package:final_project/models/user_model.dart';
+
+import 'package:final_project/pages/login.dart';
 import 'package:final_project/pages/recipe.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'category.dart';
 import 'package:filter_list/filter_list.dart';
-import 'package:final_project/controllers/diet_controller.dart';
 import 'package:get/get.dart';
 
+import 'package:final_project/controllers/diet_controller.dart';
+
 List<String> DefaultList = [
-  'Pasta',
-  'Tomato',
-  'Cheese',
-  'Pizza base',
   'Salmon',
   'Rice',
   'Nori',
   'Bola',
   'Milk',
   'Eggs',
-  'Flour'
+  'Honey',
+  'Flour',
+  'Cheese',
+  'Mola',
 ];
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key});
+  final UserModel user;
+  HomePage({super.key, required this.user});
   @override
-  _HomePageState createState() => _HomePageState();
+  _HomePageState createState() => _HomePageState(user: user);
 }
 
 class _HomePageState extends State<HomePage> {
   var isFocused = false.obs;
+  final UserModel user;
 
+  _HomePageState({required this.user});
   List<CategoryModel> categories = [];
   var diets = [];
   List<DietModel> popularDiets = [];
@@ -79,6 +86,32 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: appBar(),
       backgroundColor: Colors.white,
+      drawer: Drawer(
+        shadowColor: const Color.fromARGB(0, 194, 146, 146),
+        backgroundColor: const Color(0xffF7F8F8),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              decoration: BoxDecoration(
+                color: Color(0xffF7F8F8),
+              ),
+              accountName: Text(
+                user.name,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              accountEmail: null,
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: AssetImage('assets/images/user_photo.png'),
+              ),
+            ),
+          ],
+        ),
+      ),
       body: ListView(
         children: [
           _searchField(),
@@ -335,7 +368,8 @@ class _HomePageState extends State<HomePage> {
                   //             category: categories[index].name,
                   //           )),
                   // );
-                  Get.to(() => CategoryPage(category: categories[index].name));
+                  Get.to(() => CategoryPage(
+                      category: categories[index].name, user: user));
                 },
                 child: Container(
                   width: 100,
@@ -610,7 +644,17 @@ class _HomePageState extends State<HomePage> {
       elevation: 0.0,
       centerTitle: true,
       leading: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          // make confirmation dialog using GetX
+          Get.snackbar('Logout', 'Are you sure you want to logout?',
+              snackPosition: SnackPosition.BOTTOM,
+              mainButton: TextButton(
+                onPressed: () {
+                  Get.offAll(() => LoginScreen());
+                },
+                child: Text('Confirm'),
+              ));
+        },
         child: Container(
           margin: const EdgeInsets.all(10),
           alignment: Alignment.center,
@@ -626,7 +670,9 @@ class _HomePageState extends State<HomePage> {
       ),
       actions: [
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+            Scaffold.of(context).openDrawer();
+          },
           child: Container(
             margin: const EdgeInsets.all(10),
             alignment: Alignment.center,

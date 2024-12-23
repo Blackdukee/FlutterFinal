@@ -67,17 +67,21 @@ class ApiService {
   }
 
   Future<UserModel> createUser(UserModel user) async {
+    
     final response = await http.post(
       Uri.parse('$baseUrl/users'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(user.toJson()),
+      
     );
 
     if (response.statusCode == 201) {
       return UserModel.fromJson(jsonDecode(response.body));
     } else {
+      
       throw Exception('Failed to create user');
     }
+    
   }
 
   Future<UserModel> getUser(String email, String password) async {
@@ -94,43 +98,7 @@ class ApiService {
     }
   }
 
-  Future<UserModel> updateUser(UserModel user) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/users/${user.id}'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(user.toJson()),
-    );
 
-    if (response.statusCode == 200) {
-      return UserModel.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to update user');
-    }
-  }
-
-  Future<List<DietModel>> getUserHistory(String userId) async {
-    final response =
-        await http.get(Uri.parse('$baseUrl/users/$userId/history'));
-
-    if (response.statusCode == 200) {
-      Iterable list = jsonDecode(response.body);
-      return list.map((json) => DietModel.fromMap(json)).toList();
-    } else {
-      throw Exception('Failed to retrieve user history');
-    }
-  }
-
-  Future<List<DietModel>> getUserSavedRecipes(String userId) async {
-    final response =
-        await http.get(Uri.parse('$baseUrl/users/$userId/saved-recipes'));
-
-    if (response.statusCode == 200) {
-      Iterable list = jsonDecode(response.body);
-      return list.map((json) => DietModel.fromMap(json)).toList();
-    } else {
-      throw Exception('Failed to retrieve user saved recipes');
-    }
-  }
 
   Future<List<DietModel>> getDietsWithFilters(String filters) async {
     final response =

@@ -1,11 +1,12 @@
+import 'package:final_project/controllers/user_controller.dart';
 import 'package:final_project/pages/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:filter_list/filter_list.dart';
 import 'package:get/get.dart';
-import 'dart:io';
 import 'package:final_project/controllers/diet_controller.dart';
 import 'package:final_project/models/diet_model.dart';
+import 'package:final_project/models/user_model.dart';
 import 'package:final_project/pages/recipe.dart';
 
 List<String> DefaultList = [
@@ -21,17 +22,21 @@ List<String> DefaultList = [
 
 class CategoryPage extends StatefulWidget {
   final String category;
-  CategoryPage({super.key, required this.category});
+  final UserModel user;
+  CategoryPage({super.key, required this.category, required this.user});
   @override
-  _CategoryPageState createState() => _CategoryPageState();
+  _CategoryPageState createState() => _CategoryPageState(user: user);
 }
 
 class _CategoryPageState extends State<CategoryPage> {
+  final UserController userController = UserController();
   final searchControllerToRemove = TextEditingController();
   final searchFocusNode = FocusNode();
   final dietController = Get.put(DietController());
   final isFocused = false.obs;
   late List<DietModel> diets;
+  final UserModel user;
+  _CategoryPageState({required this.user});
 
   @override
   void initState() {
@@ -82,7 +87,9 @@ class _CategoryPageState extends State<CategoryPage> {
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () {
-            Get.off(HomePage());
+            Get.off(HomePage(
+              user: user,
+            ));
           },
           child: Container(
             margin: const EdgeInsets.all(10),
@@ -133,12 +140,12 @@ class _CategoryPageState extends State<CategoryPage> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const UserAccountsDrawerHeader(
+            UserAccountsDrawerHeader(
               decoration: BoxDecoration(
                 color: Color(0xffF7F8F8),
               ),
               accountName: Text(
-                'User Name',
+                user.name,
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 18,
@@ -149,27 +156,6 @@ class _CategoryPageState extends State<CategoryPage> {
               currentAccountPicture: CircleAvatar(
                 backgroundImage: AssetImage('assets/images/user_photo.png'),
               ),
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
-              onTap: () {
-                // Navigate to Settings
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.history),
-              title: Text('History'),
-              onTap: () {
-                // Navigate to History
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.bookmark),
-              title: Text('Saved Recipes'),
-              onTap: () {
-                // Navigate to Saved Recipes
-              },
             ),
           ],
         ),

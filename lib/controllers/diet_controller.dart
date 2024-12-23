@@ -1,7 +1,6 @@
 import 'package:final_project/models/diet_model.dart';
 import 'package:final_project/services/api_service.dart';
 import 'package:get/get.dart';
-import 'dart:io';
 import 'package:flutter/widgets.dart';
 
 class DietController extends GetxController {
