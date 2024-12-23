@@ -264,8 +264,8 @@ class _CategoryPageState extends State<CategoryPage> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) =>
-                                                RecipeScreen(diet: diet)),
+                                            builder: (context) => RecipeScreen(
+                                                diet: diet, user: user)),
                                       );
                                       setState(() {
                                         DietModel.updateSelectedDiet(

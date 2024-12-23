@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import '../models/diet_model.dart';
+import '../models/user_model.dart';
 
-class RecipeScreen extends StatelessWidget {
+class RecipeScreen extends StatefulWidget {
   final DietModel diet;
+  final UserModel user;
+  RecipeScreen({Key? key, required this.diet, required this.user})
+      : super(key: key);
+  @override
+  _RecipeScreen createState() => _RecipeScreen();
+}
 
-  RecipeScreen({super.key, required this.diet}); // Added constructor
+class _RecipeScreen extends State<RecipeScreen> {
+  DietModel get diet => widget.diet;
+  UserModel get user => widget.user;
 
   @override
   Widget build(BuildContext context) {

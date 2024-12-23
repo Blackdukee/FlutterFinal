@@ -205,8 +205,7 @@ class _HomePageState extends State<HomePage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => RecipeScreen(
-                                        diet: popularDiets[index],
-                                      )),
+                                      diet: popularDiets[index], user: user)),
                             );
                           },
                           child: SvgPicture.asset(
@@ -286,8 +285,7 @@ class _HomePageState extends State<HomePage> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => RecipeScreen(
-                                      diet: diets[index],
-                                    )),
+                                    diet: diets[index], user: user)),
                           );
                           setState(() {
                             DietModel.updateSelectedDiet(diets, index);
